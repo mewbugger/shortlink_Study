@@ -7,6 +7,12 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>shortlink_Study</name>
     <description>shortlink_Study</description>
+    <modules>
+        <module>admin</module>
+        <module>project</module>
+        <module>gateway</module>
+    </modules>
+    <packaging>pom</packaging>
     <properties>
         <java.version>17</java.version>
         <spring-boot.version>3.0.7</spring-boot.version>
@@ -22,6 +28,13 @@
         <redisson.version>3.21.3</redisson.version>
         <guava.version>30.0-jre</guava.version>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+    </dependencies>
     <dependencyManagement>
         <dependencies>
             <dependency>
