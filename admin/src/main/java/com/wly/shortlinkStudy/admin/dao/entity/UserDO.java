@@ -27,12 +27,17 @@ public class UserDO {
     /**
      * 真实姓名
      */
-    private String real_name;
+    private String realName;
 
     /**
      * 邮箱
      */
     private String mail;
+
+    /**
+     * 手机号
+     */
+    private String phone;
 
     /**
      * 删除时间戳
