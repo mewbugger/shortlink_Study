@@ -2,7 +2,10 @@ package com.wly.shortlinkStudy.admin.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wly.shortlinkStudy.admin.dao.entity.UserDO;
+import com.wly.shortlinkStudy.admin.dto.req.UserLoginReqDTO;
 import com.wly.shortlinkStudy.admin.dto.req.UserRegisterReqDTO;
+import com.wly.shortlinkStudy.admin.dto.req.UserUpdateReqDTO;
+import com.wly.shortlinkStudy.admin.dto.resp.UserLoginRespDTO;
 import com.wly.shortlinkStudy.admin.dto.resp.UserRespDTO;
 
 public interface UserService extends IService<UserDO> {
@@ -27,4 +30,24 @@ public interface UserService extends IService<UserDO> {
      */
     void Register(UserRegisterReqDTO requestParam);
 
+    /**
+     * 根据用户名修改用户
+     * @param requestParam
+     */
+    void update(UserUpdateReqDTO requestParam);
+
+
+    /**
+     * 用户登录
+     * @param requestParam 用户登录请求参数
+     * @return 用户登录返回参数
+     */
+    UserLoginRespDTO login(UserLoginReqDTO requestParam);
+
+    /**
+     * 检查用户是否登录
+     * @param token 用户登录token
+     * @return
+     */
+    Boolean checkLogin(String username, String token);
 }

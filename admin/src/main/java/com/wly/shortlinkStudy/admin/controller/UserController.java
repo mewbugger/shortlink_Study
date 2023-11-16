@@ -5,8 +5,11 @@ import cn.hutool.core.bean.BeanUtil;
 import com.wly.shortlinkStudy.admin.common.convention.result.Result;
 import com.wly.shortlinkStudy.admin.common.convention.result.Results;
 import com.wly.shortlinkStudy.admin.common.enums.UserErrorCodeEnum;
+import com.wly.shortlinkStudy.admin.dto.req.UserLoginReqDTO;
 import com.wly.shortlinkStudy.admin.dto.req.UserRegisterReqDTO;
+import com.wly.shortlinkStudy.admin.dto.req.UserUpdateReqDTO;
 import com.wly.shortlinkStudy.admin.dto.resp.UserActualRespDTO;
+import com.wly.shortlinkStudy.admin.dto.resp.UserLoginRespDTO;
 import com.wly.shortlinkStudy.admin.dto.resp.UserRespDTO;
 import com.wly.shortlinkStudy.admin.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -73,5 +76,40 @@ public class UserController {
     public Result<Void> register(@RequestBody UserRegisterReqDTO requestParam) {
         userService.Register(requestParam);
         return Results.success();
+    }
+
+    /**
+     * 根据用户名修改用户
+     * @param requestParam
+     * @return
+     */
+    @PutMapping("/api/short-link/v1/user")
+    public Result<Void> update(@RequestBody UserUpdateReqDTO requestParam) {
+        userService.update(requestParam);
+        return Results.success();
+    }
+
+
+    /**
+     * 用户登录
+     * @param requestParam
+     * @return
+     */
+    @PostMapping("/api/short-link/v1/user/login")
+    public Result<UserLoginRespDTO> login(@RequestBody UserLoginReqDTO requestParam) {
+        UserLoginRespDTO result = userService.login(requestParam);
+        return Results.success(result);
+    }
+
+    /**
+     * 检查用户是否登录
+     * @param username
+     * @param token
+     * @return
+     */
+    @GetMapping("/api/short-link/v1/user/check-login")
+    public Result<Boolean> checkLogin(@RequestParam("username") String username, @RequestParam("token") String token) {
+        Boolean result = userService.checkLogin(username, token);
+        return Results.success(result);
     }
 }
