@@ -21,22 +21,24 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
     public void saveGroup(ShortLinkGroupSaveReqDTO requestParam) {
         String gid;
         // 反复生成随机的gid直到gid不重复
-        while(true) {
+        while (true) {
             gid = RandomGenerator.generateRandom();
             if (hasGid(gid)) {
                 break;
             }
         }
         GroupDO groupDO = GroupDO.builder()
-                        .gid(gid)
-                                .name(requestParam.getName())
-                                        .build();
+                .gid(gid)
+                .name(requestParam.getName())
+                .sortOrder(0)
+                .build();
 
         baseMapper.insert(groupDO);
     }
 
     /**
      * 判断随机生成的gid是否已经存在
+     *
      * @param gid
      * @return
      */
