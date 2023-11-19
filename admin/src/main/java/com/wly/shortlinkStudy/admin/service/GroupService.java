@@ -3,6 +3,9 @@ package com.wly.shortlinkStudy.admin.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wly.shortlinkStudy.admin.dao.entity.GroupDO;
 import com.wly.shortlinkStudy.admin.dto.req.ShortLinkGroupSaveReqDTO;
+import com.wly.shortlinkStudy.admin.dto.resp.ShortLinkGroupRespDTO;
+
+import java.util.List;
 
 /**
  * 短连接分组接口层
@@ -14,4 +17,10 @@ public interface GroupService extends IService<GroupDO> {
      * @param requestParam 短连接分组新增请求实体类
      */
     void saveGroup(ShortLinkGroupSaveReqDTO requestParam);
+
+    /**
+     * 查询用户短连接分组集合
+     * @return
+     */
+    List<ShortLinkGroupRespDTO> listGroup();
 }
