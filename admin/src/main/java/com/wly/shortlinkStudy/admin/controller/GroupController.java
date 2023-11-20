@@ -3,6 +3,7 @@ package com.wly.shortlinkStudy.admin.controller;
 import com.wly.shortlinkStudy.admin.common.convention.result.Result;
 import com.wly.shortlinkStudy.admin.common.convention.result.Results;
 import com.wly.shortlinkStudy.admin.dto.req.ShortLinkGroupSaveReqDTO;
+import com.wly.shortlinkStudy.admin.dto.req.ShortLinkGroupSortReqDTO;
 import com.wly.shortlinkStudy.admin.dto.req.ShortLinkGroupUpdateReqDTO;
 import com.wly.shortlinkStudy.admin.dto.resp.ShortLinkGroupRespDTO;
 import com.wly.shortlinkStudy.admin.service.GroupService;
@@ -59,6 +60,17 @@ public class GroupController {
     @DeleteMapping("/api/short-link/v1/group")
     public Result<Void> deleteGroup(@RequestParam String gid) {
         groupService.deleteGroup(gid);
+        return Results.success();
+    }
+
+    /**
+     * 短连接分组排序
+     * @param requestParam 短连接分组排序参数
+     * @return
+     */
+    @PostMapping("/api/short-link/v1/group/sort")
+    public Result<Void> sortGroup(@RequestBody List<ShortLinkGroupSortReqDTO> requestParam) {
+        groupService.sortGroup(requestParam);
         return Results.success();
     }
 }
