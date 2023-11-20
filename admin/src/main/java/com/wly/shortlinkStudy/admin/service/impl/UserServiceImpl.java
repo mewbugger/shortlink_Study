@@ -107,7 +107,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         // 用哈希，避免重复登录，导致不断创建新的token
         stringRedisTemplate.opsForHash().put("login_" + requestParam.getUsername(), uuid, JSON.toJSONString(userDO));
         // 设置过期时间
-        stringRedisTemplate.expire("login_" + requestParam.getUsername(), 30, TimeUnit.MINUTES);
+        stringRedisTemplate.expire("login_" + requestParam.getUsername(), 30, TimeUnit.DAYS);
         return new UserLoginRespDTO(uuid);
     }
 
