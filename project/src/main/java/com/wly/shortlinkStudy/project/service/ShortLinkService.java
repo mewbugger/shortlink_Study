@@ -5,8 +5,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.wly.shortlinkStudy.project.dao.entity.ShortLinkDO;
 import com.wly.shortlinkStudy.project.dto.req.ShortLinkCreateReqDTO;
 import com.wly.shortlinkStudy.project.dto.req.ShortLinkPageReqDTO;
+import com.wly.shortlinkStudy.project.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import com.wly.shortlinkStudy.project.dto.resp.ShortLinkCreateRespDTO;
 import com.wly.shortlinkStudy.project.dto.resp.ShortLinkPageRespDTO;
+
+import java.util.List;
 
 /**
  * 短连接接口层
@@ -27,4 +30,11 @@ public interface ShortLinkService extends IService<ShortLinkDO> {
      * @return 分页查询短链接返回参数
      */
     IPage<ShortLinkPageRespDTO> pageShortLink(ShortLinkPageReqDTO requestParam);
+
+    /**
+     * 查询短链接分组内数量
+     * @param requestParam 创建短链接分组内数量请求参数
+     * @return
+     */
+    List<ShortLinkGroupCountQueryRespDTO> listGroupShortLinkCount(List<String> requestParam);
 }
