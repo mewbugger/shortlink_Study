@@ -9,7 +9,6 @@ import com.wly.shortlinkStudy.admin.common.biz.user.UserContext;
 import com.wly.shortlinkStudy.admin.common.convention.result.Result;
 import com.wly.shortlinkStudy.admin.dao.entity.GroupDO;
 import com.wly.shortlinkStudy.admin.dao.mapper.GroupMapper;
-import com.wly.shortlinkStudy.admin.dto.req.ShortLinkGroupSaveReqDTO;
 import com.wly.shortlinkStudy.admin.dto.req.ShortLinkGroupSortReqDTO;
 import com.wly.shortlinkStudy.admin.dto.req.ShortLinkGroupUpdateReqDTO;
 import com.wly.shortlinkStudy.admin.dto.resp.ShortLinkGroupRespDTO;
@@ -38,7 +37,7 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
     };
 
     @Override
-    public void saveGroup(ShortLinkGroupSaveReqDTO requestParam) {
+    public void saveGroup(String groupName) {
         String gid;
         // 反复生成随机的gid直到gid不重复
         while (true) {
@@ -51,7 +50,7 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
                 .gid(gid)
                 .sortOrder(0)
                 .username(UserContext.getUsername())
-                .name(requestParam.getName())
+                .name(groupName)
                 .build();
 
         baseMapper.insert(groupDO);

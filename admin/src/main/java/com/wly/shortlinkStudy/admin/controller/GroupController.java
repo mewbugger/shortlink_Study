@@ -30,7 +30,7 @@ public class GroupController {
      */
     @PostMapping("/api/short-link/v1/admin/group")
     public Result<Void> save(@RequestBody ShortLinkGroupSaveReqDTO requestParam) {
-        groupService.saveGroup(requestParam);
+        groupService.saveGroup(requestParam.getGroupName());
         return Results.success();
     }
 
