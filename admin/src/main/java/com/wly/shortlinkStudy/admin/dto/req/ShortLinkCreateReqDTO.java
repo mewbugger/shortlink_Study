@@ -1,4 +1,4 @@
-package com.wly.shortlinkStudy.project.dto.req;
+package com.wly.shortlinkStudy.admin.dto.req;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
