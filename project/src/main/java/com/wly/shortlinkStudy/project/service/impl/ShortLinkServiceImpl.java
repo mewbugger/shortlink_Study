@@ -4,14 +4,18 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.text.StrBuilder;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.wly.shortlinkStudy.project.common.convention.exception.ClientException;
 import com.wly.shortlinkStudy.project.common.convention.exception.ServiceException;
+import com.wly.shortlinkStudy.project.common.enums.VaildDateTypeEnum;
 import com.wly.shortlinkStudy.project.dao.entity.ShortLinkDO;
 import com.wly.shortlinkStudy.project.dao.mapper.ShortLinkMapper;
 import com.wly.shortlinkStudy.project.dto.req.ShortLinkCreateReqDTO;
 import com.wly.shortlinkStudy.project.dto.req.ShortLinkPageReqDTO;
+import com.wly.shortlinkStudy.project.dto.req.ShortLinkUpdateReqDTO;
 import com.wly.shortlinkStudy.project.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import com.wly.shortlinkStudy.project.dto.resp.ShortLinkCreateRespDTO;
 import com.wly.shortlinkStudy.project.dto.resp.ShortLinkPageRespDTO;
@@ -22,9 +26,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBloomFilter;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 短连接接口实现层
@@ -94,6 +100,55 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 .groupBy("gid");
         List<Map<String, Object>> shortLinkDOList = baseMapper.selectMaps(queryWrapper);
         return BeanUtil.copyToList(shortLinkDOList, ShortLinkGroupCountQueryRespDTO.class);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void updateShortLink(ShortLinkUpdateReqDTO requestParam) {
+        //如果修改的是短链接的分组标识，则updateWrapper为空，无法修改，所以先找到原短链接，直接删除，将新的短链接插入数据库
+        LambdaQueryWrapper<ShortLinkDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkDO.class)
+                .eq(ShortLinkDO::getGid, requestParam.getGid())
+                .eq(ShortLinkDO::getFullShortUrl, requestParam.getFullShortUrl())
+                .eq(ShortLinkDO::getDelFlag, 0)
+                .eq(ShortLinkDO::getEnableStatus, 0);
+        ShortLinkDO hasShortLinkDO = baseMapper.selectOne(queryWrapper);
+        if (hasShortLinkDO == null) {
+            throw new ClientException("短链接记录不存在");
+        }
+        ShortLinkDO shortLinkDO = ShortLinkDO.builder()
+                .domain(hasShortLinkDO.getDomain())
+                .shortUri(hasShortLinkDO.getShortUri())
+                .clickNum(hasShortLinkDO.getClickNum())
+                .favicon(hasShortLinkDO.getFavicon())
+                .createdType(hasShortLinkDO.getCreatedType())
+                .gid(requestParam.getGid())
+                .originUrl(requestParam.getOriginUrl())
+                .describe(requestParam.getDescribe())
+                .validDateType(requestParam.getValidDateType())
+                .validDate(requestParam.getValidDate())
+                .build();
+        //修改的短链接的分组id没有改变,正常修改
+        if (Objects.equals(hasShortLinkDO.getGid(), requestParam.getGid())) {
+            LambdaUpdateWrapper<ShortLinkDO> updateWrapper = Wrappers.lambdaUpdate(ShortLinkDO.class)
+                    .eq(ShortLinkDO::getFullShortUrl, requestParam.getFullShortUrl())
+                    .eq(ShortLinkDO::getGid, requestParam.getGid())
+                    .eq(ShortLinkDO::getDelFlag, 0)
+                    .eq(ShortLinkDO::getEnableStatus, 0)
+                    //如果 requestParam 中的 validDateType 与 VaildDateTypeEnum.PERMANENT.getType() 相等，则设置 ShortLinkDO 对象的 validDateType 为 null。
+                    //VaildDateTypeEnum.PERMANENT的含义是该短链接永久有效，所以有效时间设置为null
+                    .set(Objects.equals(requestParam.getValidDateType(), VaildDateTypeEnum.PERMANENT.getType()), ShortLinkDO::getValidDate, null);
+            baseMapper.update(shortLinkDO, updateWrapper);
+        } else {
+            // 修改的短链接的分组标识改变了，则把原有的删掉，再把修改的短链接插入数据库
+            LambdaUpdateWrapper<ShortLinkDO> updateWrapper = Wrappers.lambdaUpdate(ShortLinkDO.class)
+                    .eq(ShortLinkDO::getFullShortUrl, requestParam.getFullShortUrl())
+                    .eq(ShortLinkDO::getGid, hasShortLinkDO.getGid())
+                    .eq(ShortLinkDO::getDelFlag, 0)
+                    .eq(ShortLinkDO::getEnableStatus, 0);
+            baseMapper.delete(updateWrapper);
+            baseMapper.insert(shortLinkDO);
+        }
+
     }
 
     private String generateSuffix(ShortLinkCreateReqDTO requestParam) {

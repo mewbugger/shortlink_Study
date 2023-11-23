@@ -67,16 +67,23 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
                 .eq(GroupDO::getDelFlag, 0)
                 .eq(GroupDO::getUsername, UserContext.getUsername())
                 .orderByDesc(GroupDO::getSortOrder, GroupDO::getUpdateTime);
+        //查到当前用户的所有短链接分组列表
         List<GroupDO> groupDOList = baseMapper.selectList(queryWrapper);
+        //通过当前用户的gid列表获取ShortLinkGroupCountQueryRespDTO（包含gid和shortLinkCount）的列表
         Result<List<ShortLinkGroupCountQueryRespDTO>> listResult = shortLinkRemoteService
                 //将 groupDOList 中每个 GroupDO 对象的 gid 属性提取出来，并形成一个新的列表
                 //map(GroupDO::getGid) 是一个映射操作，它会将流中的每个 GroupDO 对象映射为其 gid 属性。
+                //groupDOList.stream().map(GroupDO::getGid).toList()==获取当前用户的所有短链接分组的分组标识，并将它们存到一个列表里面
                 .listGroupShortLinkCount(groupDOList.stream().map(GroupDO::getGid).toList());
+        //将当前用户的所有短链接分组列表转换成（请求当前用户所有分组返回参数列表，返回参数中的属性有gid和shortLinkCount）
         List<ShortLinkGroupRespDTO> shortLinkGroupRespDTOList = BeanUtil.copyToList(groupDOList, ShortLinkGroupRespDTO.class);
+        //通过ShortLinkGroupCountQueryRespDTO列表，来补齐shortLinkGroupRespDTOList列表中缺少的shortLinkCount
         shortLinkGroupRespDTOList.forEach(each -> {
             Optional<ShortLinkGroupCountQueryRespDTO> first = listResult.getData().stream()
                     .filter(item -> Objects.equals(item.getGid(), each.getGid()))
+                    //其实本质上就是只有一个，findFirst只是为了获取该元素
                     .findFirst();
+            //如果存在，将ShortLinkGroupCountQueryRespDTO中的shortLinkCount赋值给shortLinkGroupRespDTO（即下面的each）
             first.ifPresent(item -> each.setShortLinkCount(first.get().getShortLinkCount()));
         });
         return shortLinkGroupRespDTOList;

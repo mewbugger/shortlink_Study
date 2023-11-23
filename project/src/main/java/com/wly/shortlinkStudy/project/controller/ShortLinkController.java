@@ -5,8 +5,9 @@ import com.wly.shortlinkStudy.project.common.convention.result.Result;
 import com.wly.shortlinkStudy.project.common.convention.result.Results;
 import com.wly.shortlinkStudy.project.dto.req.ShortLinkCreateReqDTO;
 import com.wly.shortlinkStudy.project.dto.req.ShortLinkPageReqDTO;
-import com.wly.shortlinkStudy.project.dto.resp.ShortLinkGroupCountQueryRespDTO;
+import com.wly.shortlinkStudy.project.dto.req.ShortLinkUpdateReqDTO;
 import com.wly.shortlinkStudy.project.dto.resp.ShortLinkCreateRespDTO;
+import com.wly.shortlinkStudy.project.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import com.wly.shortlinkStudy.project.dto.resp.ShortLinkPageRespDTO;
 import com.wly.shortlinkStudy.project.service.ShortLinkService;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,17 @@ public class ShortLinkController {
     public Result<ShortLinkCreateRespDTO> createShortLink(@RequestBody ShortLinkCreateReqDTO requestParam) {
         ShortLinkCreateRespDTO result = shortLinkService.createShortLink(requestParam);
         return Results.success(result);
+    }
+
+    /**
+     * 修改短链接
+     * @param requestParam
+     * @return
+     */
+    @PostMapping("/api/short-link/v1/update")
+    public Result<Void> updateShortLink(@RequestBody ShortLinkUpdateReqDTO requestParam) {
+        shortLinkService.updateShortLink(requestParam);
+        return Results.success();
     }
 
     /**
