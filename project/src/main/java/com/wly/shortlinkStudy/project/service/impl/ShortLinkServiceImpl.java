@@ -140,7 +140,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             return;
         }
         //上锁，避免缓存击穿
-        //避免缓存中的数据删除或过期的情况下，太多请求一下子打过来，缓存中没有，请求都打到数据库
+        //避免缓存中的数据删除或过期的时刻，太多请求一下子打过来，缓存中没有，请求都打到数据库，显然用于发广告的短链接会有这种情况
         //加锁后，缓存请求就只能一个一个来
         RLock lock = redissonClient.getLock(String.format(RedisKeyConstant.LOCK_GOTO_SHORT_LINK_KEY, fullShortUrl));
         lock.lock();
