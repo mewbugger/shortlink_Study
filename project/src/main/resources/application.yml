@@ -20,4 +20,7 @@ spring:
       host: 192.168.81.130
       port: 6379
       password: javacppgorust
-
+  mvc:
+    view:
+      prefix: /templates/
+      suffix: .html
