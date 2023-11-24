@@ -10,7 +10,7 @@ import com.wly.shortlinkStudy.project.common.constant.RedisKeyConstant;
 import com.wly.shortlinkStudy.project.dao.entity.ShortLinkDO;
 import com.wly.shortlinkStudy.project.dao.mapper.ShortLinkMapper;
 import com.wly.shortlinkStudy.project.dto.req.RecycleBinSaveReqDTO;
-import com.wly.shortlinkStudy.project.dto.req.ShortLinkPageReqDTO;
+import com.wly.shortlinkStudy.project.dto.req.ShortLinkRecycleBinPageDTO;
 import com.wly.shortlinkStudy.project.dto.resp.ShortLinkPageRespDTO;
 import com.wly.shortlinkStudy.project.service.RecycleBinService;
 import lombok.RequiredArgsConstructor;
@@ -44,9 +44,9 @@ public class RecycleBinServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLin
     }
 
     @Override
-    public IPage<ShortLinkPageRespDTO> pageRecycleBinShortLink(ShortLinkPageReqDTO requestParam) {
+    public IPage<ShortLinkPageRespDTO> pageRecycleBinShortLink(ShortLinkRecycleBinPageDTO requestParam) {
         LambdaQueryWrapper<ShortLinkDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkDO.class)
-                .eq(ShortLinkDO::getGid, requestParam.getGid())
+                .in(ShortLinkDO::getGid, requestParam.getGidList())
                 .eq(ShortLinkDO::getDelFlag, 0)
                 .eq(ShortLinkDO::getEnableStatus, 1)
                 .orderByDesc(ShortLinkDO::getCreateTime);

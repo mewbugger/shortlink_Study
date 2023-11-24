@@ -6,10 +6,7 @@ import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.wly.shortlinkStudy.admin.common.convention.result.Result;
 import com.wly.shortlinkStudy.admin.common.convention.result.Results;
-import com.wly.shortlinkStudy.admin.remote.dto.req.RecycleBinSaveReqDTO;
-import com.wly.shortlinkStudy.admin.remote.dto.req.ShortLinkCreateReqDTO;
-import com.wly.shortlinkStudy.admin.remote.dto.req.ShortLinkPageReqDTO;
-import com.wly.shortlinkStudy.admin.remote.dto.req.ShortLinkUpdateReqDTO;
+import com.wly.shortlinkStudy.admin.remote.dto.req.*;
 import com.wly.shortlinkStudy.admin.remote.dto.resp.ShortLinkCreateRespDTO;
 import com.wly.shortlinkStudy.admin.remote.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import com.wly.shortlinkStudy.admin.remote.dto.resp.ShortLinkPageRespDTO;
@@ -85,10 +82,10 @@ public interface ShortLinkRemoteService {
      * @param requestParam 分页查询回收站短链接请求参数
      * @return
      */
-    default Result<IPage<ShortLinkPageRespDTO>> pageRecycleBinShortLink(ShortLinkPageReqDTO requestParam) {
+    default Result<IPage<ShortLinkPageRespDTO>> pageRecycleBinShortLink(ShortLinkRecycleBinPageDTO requestParam) {
         //由于中台提供的是get方法，所以这里使用Map，Map作为参数可以直接序列化到路径上面
         Map<String, Object> requestMap = new HashMap<>();
-        requestMap.put("gid", requestParam.getGid());
+        requestMap.put("gidList", requestParam.getGidList());
         requestMap.put("current", requestParam.getCurrent());
         requestMap.put("size", requestParam.getSize());
         String resultPageStr = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/recycle-bin/page", requestMap);
