@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wly.shortlinkStudy.project.common.constant.RedisKeyConstant;
 import com.wly.shortlinkStudy.project.dao.entity.ShortLinkDO;
 import com.wly.shortlinkStudy.project.dao.mapper.ShortLinkMapper;
+import com.wly.shortlinkStudy.project.dto.req.RecycleBinRecoverReqDTO;
 import com.wly.shortlinkStudy.project.dto.req.RecycleBinSaveReqDTO;
 import com.wly.shortlinkStudy.project.dto.req.ShortLinkRecycleBinPageDTO;
 import com.wly.shortlinkStudy.project.dto.resp.ShortLinkPageRespDTO;
@@ -56,5 +57,20 @@ public class RecycleBinServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLin
             result.setDomain("http://" + result.getDomain());
             return result;
         });
+    }
+
+    @Override
+    public void recoverRecycleBin(RecycleBinRecoverReqDTO requestParam) {
+        LambdaUpdateWrapper<ShortLinkDO> updateWrapper = Wrappers.lambdaUpdate(ShortLinkDO.class)
+                .eq(ShortLinkDO::getFullShortUrl, requestParam.getFullShortUrl())
+                .eq(ShortLinkDO::getGid, requestParam.getGid())
+                .eq(ShortLinkDO::getEnableStatus, 1)
+                .eq(ShortLinkDO::getDelFlag, 0);
+        ShortLinkDO shortLinkDO = ShortLinkDO.builder()
+                .enableStatus(0)
+                .build();
+        baseMapper.update(shortLinkDO, updateWrapper);
+        //从缓存中加入跳转表没有的当前短链接与原始链接配对的标识
+        stringRedisTemplate.delete(String.format(RedisKeyConstant.GOTO_IS_NULL_SHORT_LINK_KEY, requestParam.getFullShortUrl()));
     }
 }
