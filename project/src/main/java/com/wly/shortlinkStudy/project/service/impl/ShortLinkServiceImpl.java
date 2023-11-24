@@ -25,6 +25,7 @@ import com.wly.shortlinkStudy.project.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import com.wly.shortlinkStudy.project.dto.resp.ShortLinkPageRespDTO;
 import com.wly.shortlinkStudy.project.service.ShortLinkService;
 import com.wly.shortlinkStudy.project.toolkit.HashUtil;
+import com.wly.shortlinkStudy.project.toolkit.LinkUtil;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletResponse;
@@ -39,6 +40,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -87,14 +89,14 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             baseMapper.insert(shortLinkDO);
             shortLinkGotoMapper.insert(shortLinkGotoDO);
         } catch (DuplicateKeyException ex) {
-            LambdaQueryWrapper<ShortLinkDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkDO.class)
-                    .eq(ShortLinkDO::getFullShortUrl, fullShortUrl);
-            ShortLinkDO hasShortLinkDO = baseMapper.selectOne(queryWrapper);
-            if (hasShortLinkDO != null) {
-                log.warn("短连接： {} 重复入库", fullShortUrl);
-                throw new ServiceException("短连接重复生成");
-            }
+            log.warn("短连接： {} 重复入库", fullShortUrl);
+            throw new ServiceException("短连接重复生成");
         }
+        //缓存预热
+        stringRedisTemplate.opsForValue().set(
+                String.format(RedisKeyConstant.GOTO_SHORT_LINK_KEY, fullShortUrl),
+                requestParam.getOriginUrl(),
+                LinkUtil.getLinkCacheValidTime(requestParam.getValidDate()), TimeUnit.MILLISECONDS);
         shortUriCreateCachePenetrationBloomFilter.add(fullShortUrl);
         return ShortLinkCreateRespDTO.builder()
                 .fullShortUrl("http://" + shortLinkDO.getFullShortUrl())
@@ -177,7 +179,20 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .eq(ShortLinkDO::getEnableStatus, 0);
             ShortLinkDO shortLinkDO = baseMapper.selectOne(queryWrapper);
             if (shortLinkDO != null) {
+                //判断查出来的短链接有没有过期
+                //短链接有效期不为空，说明不是永久有效，即可能会过期
+                if (shortLinkDO.getValidDate() != null && shortLinkDO.getValidDate().before(new Date())) {
+                    //如果过期了，则和没有是一样的，将短链接空值跳转前缀 Key加入缓存
+                    stringRedisTemplate.opsForValue().set(String.format(RedisKeyConstant.GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl), "-", 30, TimeUnit.MINUTES);
+                    return;
+                }
                 stringRedisTemplate.opsForValue().set(String.format(RedisKeyConstant.GOTO_SHORT_LINK_KEY, fullShortUrl), shortLinkDO.getOriginUrl());
+                //缓存预热
+                stringRedisTemplate.opsForValue().set(
+                        String.format(RedisKeyConstant.GOTO_SHORT_LINK_KEY, fullShortUrl),
+                        shortLinkDO.getOriginUrl(),
+                        LinkUtil.getLinkCacheValidTime(shortLinkDO.getValidDate()), TimeUnit.MILLISECONDS
+                );
                 ((HttpServletResponse) response).sendRedirect(shortLinkDO.getOriginUrl());
             }
         } finally {
