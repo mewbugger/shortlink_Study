@@ -2,13 +2,18 @@ package com.wly.shortlinkStudy.admin.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.wly.shortlinkStudy.admin.common.convention.result.Result;
+import com.wly.shortlinkStudy.admin.common.convention.result.Results;
 import com.wly.shortlinkStudy.admin.remote.dto.ShortLinkRemoteService;
+import com.wly.shortlinkStudy.admin.remote.dto.req.RecycleBinRemoveReqDTO;
 import com.wly.shortlinkStudy.admin.remote.dto.req.ShortLinkCreateReqDTO;
 import com.wly.shortlinkStudy.admin.remote.dto.req.ShortLinkPageReqDTO;
 import com.wly.shortlinkStudy.admin.remote.dto.req.ShortLinkUpdateReqDTO;
 import com.wly.shortlinkStudy.admin.remote.dto.resp.ShortLinkCreateRespDTO;
 import com.wly.shortlinkStudy.admin.remote.dto.resp.ShortLinkPageRespDTO;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 短链接后管控制层
@@ -53,6 +58,16 @@ public class ShortLinkController {
     @GetMapping("/api/short-link/admin/v1/page")
     public Result<IPage<ShortLinkPageRespDTO>> pageShortLink(ShortLinkPageReqDTO requestParam) {
         return shortLinkRemoteService.pageShortLink(requestParam);
+    }
+
+
+    /**
+     * 回收站移除短链接功能
+     */
+    @PostMapping("/api/short-link/admin/recycle-bin/remove")
+    public Result<Void> removeRecycleBin(@RequestBody RecycleBinRemoveReqDTO requestParam) {
+        shortLinkRemoteService.removeRecycleBin(requestParam);
+        return Results.success();
     }
 
 
