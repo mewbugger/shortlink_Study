@@ -242,12 +242,16 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                         .ifPresentOrElse(each -> {
                             //如果返回的是 1，表示添加成功，集合中之前不存在这个元素，现在添加成功了。
                             //如果返回的是 0，表示添加失败，集合中已经存在这个元素，没有重复添加。
-                            Long added = stringRedisTemplate.opsForSet().add("short-link:stats:uv:" + fullShortUrl, each);
-                            uvFirstFlag.set(added != null && added > 0L);
+                            Long uvAdded = stringRedisTemplate.opsForSet().add("short-link:stats:uv:" + fullShortUrl, each);
+                            uvFirstFlag.set(uvAdded != null && uvAdded > 0L);
                         }, addResponseCookieTask);
             } else {
                 addResponseCookieTask.run();
             }
+            String remoteAddr = LinkUtil.getActualIp((HttpServletRequest) request);
+            Long uipAdded = stringRedisTemplate.opsForSet().add("short-link:stats:uip:" + fullShortUrl, remoteAddr);
+            boolean uipFirstFlag = uipAdded != null && uipAdded > 0;
+
             if (StrUtil.isBlank(gid)) {
                 LambdaQueryWrapper<ShortLinkGotoDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkGotoDO.class)
                         .eq(ShortLinkGotoDO::getFullShortUrl, fullShortUrl);
@@ -260,7 +264,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
             LinkAccessStatsDO linkAccessStatsDO = LinkAccessStatsDO.builder()
                     .pv(1)
                     .uv(uvFirstFlag.get() ? 1 : 0)
-                    .uip(1)
+                    .uip(uipFirstFlag ? 1 : 0)
                     .hour(hour)
                     .weekday(weekValue)
                     .fullShortUrl(fullShortUrl)
