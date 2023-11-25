@@ -68,22 +68,15 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLinkDO> implements ShortLinkService {
 
     private final RBloomFilter<String> shortUriCreateCachePenetrationBloomFilter;
-
     private final ShortLinkGotoMapper shortLinkGotoMapper;
-
     private final StringRedisTemplate stringRedisTemplate;
-
     private final RedissonClient redissonClient;
-
     private final LinkAccessStatsMapper linkAccessStatsMapper;
-
     private final LinkLocaleStatsMapper linkLocaleStateMapper;
-
     private final LinkOsStatsMapper linkOsStatsMapper;
-
     private final LinkBrowserStatsMapper linkBrowserStatsMapper;
-
     private final LinkAccessLogsMapper linkAccessLogsMapper;
+    private final LinkDeviceStatsMapper linkDeviceStatsMapper;
 
     //测试高德地图api的key
     @Value("${short-link.stats.locale.amap-key}")
@@ -332,16 +325,28 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                         .date(new Date())
                         .build();
                 linkBrowserStatsMapper.shortLinkBrowserState(linkBrowserStatsDO);
+                //访问设备
+                String device = LinkUtil.getDevice(((HttpServletRequest) request));
+                LinkDeviceStatsDO linkDeviceStatsDO = LinkDeviceStatsDO.builder()
+                        .device(device)
+                        .cnt(1)
+                        .gid(gid)
+                        .fullShortUrl(fullShortUrl)
+                        .date(new Date())
+                        .build();
+                linkDeviceStatsMapper.shortLinkDeviceState(linkDeviceStatsDO);
                 // 日志
                 LinkAccessLogsDO linkAccessLogsDO = LinkAccessLogsDO.builder()
                         .user(uv.get())
                         .ip(remoteAddr)
                         .browser(browser)
                         .os(os)
+                        .device(device)
                         .gid(gid)
                         .fullShortUrl(fullShortUrl)
                         .build();
                 linkAccessLogsMapper.insert(linkAccessLogsDO);
+
             }
         } catch (Throwable ex) {
             log.error("短链接访问量统计异常", ex);
