@@ -1,13 +1,16 @@
 package com.wly.shortlinkStudy.project.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DateUtil;
-import com.wly.shortlinkStudy.project.dao.entity.LinkAccessStatsDO;
-import com.wly.shortlinkStudy.project.dao.entity.LinkDeviceStatsDO;
-import com.wly.shortlinkStudy.project.dao.entity.LinkLocaleStatsDO;
-import com.wly.shortlinkStudy.project.dao.entity.LinkNetworkStatsDO;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.wly.shortlinkStudy.project.common.convention.exception.ServiceException;
+import com.wly.shortlinkStudy.project.dao.entity.*;
 import com.wly.shortlinkStudy.project.dao.mapper.*;
+import com.wly.shortlinkStudy.project.dto.req.ShortLinkStatsAccessRecordReqDTO;
 import com.wly.shortlinkStudy.project.dto.req.ShortLinkStatsReqDTO;
 import com.wly.shortlinkStudy.project.dto.resp.*;
 import com.wly.shortlinkStudy.project.service.ShortLinkStatsService;
@@ -245,4 +248,41 @@ public class ShortLinkStatsServiceImpl implements ShortLinkStatsService {
                 .networkStats(networkStats)
                 .build();
     }
+
+    @Override
+    public IPage<ShortLinkStatsAccessRecordRespDTO> shortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDTO requestParam) {
+        LambdaQueryWrapper<LinkAccessLogsDO> queryWrapper = Wrappers.lambdaQuery(LinkAccessLogsDO.class)
+                .eq(LinkAccessLogsDO::getGid, requestParam.getGid())
+                .between(LinkAccessLogsDO::getCreateTime, requestParam.getStartDate(), requestParam.getEndDate())
+                .eq(LinkAccessLogsDO::getDelFlag, 0)
+                .orderByDesc(LinkAccessLogsDO::getCreateTime);
+        IPage<LinkAccessLogsDO> linkAccessLogsDOIPage = linkAccessLogsMapper.selectPage(requestParam, queryWrapper);
+        // TODO 自己加的
+        if (CollUtil.isEmpty(linkAccessLogsDOIPage.getRecords())) {
+            throw new ServiceException("当前时间段无访问记录");
+        }
+        IPage<ShortLinkStatsAccessRecordRespDTO> actualResult = linkAccessLogsDOIPage.convert(each -> BeanUtil.toBean(each, ShortLinkStatsAccessRecordRespDTO.class));
+        List<String> userAccessLogsList = actualResult.getRecords().stream()
+                //user是token
+                .map(ShortLinkStatsAccessRecordRespDTO::getUser)
+                .toList();
+        List<Map<String, Object>> uvTypeList = linkAccessLogsMapper.selectGroupUvTypeByUsers(
+                requestParam.getGid(),
+                requestParam.getStartDate(),
+                requestParam.getEndDate(),
+                userAccessLogsList
+        );
+        actualResult.getRecords().forEach(each -> {
+            String uvType = uvTypeList.stream()
+                    .filter(item -> Objects.equals(each.getUser(), item.get("user")))
+                    .findFirst()
+                    .map(item -> item.get("uvType"))
+                    .map(Object::toString)
+                    .orElse("旧访客");
+            each.setUvType(uvType);
+        });
+        return actualResult;
+    }
+
+
 }
