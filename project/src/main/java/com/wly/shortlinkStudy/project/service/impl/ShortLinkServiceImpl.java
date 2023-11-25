@@ -21,14 +21,8 @@ import com.wly.shortlinkStudy.project.common.constant.ShortLinkConstant;
 import com.wly.shortlinkStudy.project.common.convention.exception.ClientException;
 import com.wly.shortlinkStudy.project.common.convention.exception.ServiceException;
 import com.wly.shortlinkStudy.project.common.enums.VaildDateTypeEnum;
-import com.wly.shortlinkStudy.project.dao.entity.LinkAccessStatsDO;
-import com.wly.shortlinkStudy.project.dao.entity.LinkLocaleStatsDO;
-import com.wly.shortlinkStudy.project.dao.entity.ShortLinkDO;
-import com.wly.shortlinkStudy.project.dao.entity.ShortLinkGotoDO;
-import com.wly.shortlinkStudy.project.dao.mapper.LinkAccessStatsMapper;
-import com.wly.shortlinkStudy.project.dao.mapper.LinkLocaleStatsMapper;
-import com.wly.shortlinkStudy.project.dao.mapper.ShortLinkGotoMapper;
-import com.wly.shortlinkStudy.project.dao.mapper.ShortLinkMapper;
+import com.wly.shortlinkStudy.project.dao.entity.*;
+import com.wly.shortlinkStudy.project.dao.mapper.*;
 import com.wly.shortlinkStudy.project.dto.req.ShortLinkCreateReqDTO;
 import com.wly.shortlinkStudy.project.dto.req.ShortLinkPageReqDTO;
 import com.wly.shortlinkStudy.project.dto.req.ShortLinkUpdateReqDTO;
@@ -83,6 +77,8 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     private final LinkAccessStatsMapper linkAccessStatsMapper;
 
     private final LinkLocaleStatsMapper linkLocaleStateMapper;
+
+    private final LinkOsStatsMapper linkOsStatsMapper;
 
     //测试高德地图api的key
     @Value("${short-link.stats.locale.amap-key}")
@@ -306,7 +302,17 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                         .gid(gid)
                         .date(new Date())
                         .build();
+                //地区
                 linkLocaleStateMapper.shortLinkLocaleState(linkLocaleStatsDO);
+                //操作系统
+                LinkOsStatsDO linkOsStatsDO = LinkOsStatsDO.builder()
+                        .fullShortUrl(fullShortUrl)
+                        .os(LinkUtil.getOs((HttpServletRequest) request))
+                        .cnt(1)
+                        .gid(gid)
+                        .date(new Date())
+                        .build();
+                linkOsStatsMapper.shortLinkOsState(linkOsStatsDO);
             }
         } catch (Throwable ex) {
             log.error("短链接访问量统计异常", ex);
