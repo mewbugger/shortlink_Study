@@ -4,8 +4,10 @@ package com.wly.shortlinkStudy.admin.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.wly.shortlinkStudy.admin.common.convention.result.Result;
 import com.wly.shortlinkStudy.admin.remote.dto.ShortLinkRemoteService;
+import com.wly.shortlinkStudy.admin.remote.dto.req.ShortLinkGroupStatsReqDTO;
 import com.wly.shortlinkStudy.admin.remote.dto.req.ShortLinkStatsAccessRecordReqDTO;
 import com.wly.shortlinkStudy.admin.remote.dto.req.ShortLinkStatsReqDTO;
+import com.wly.shortlinkStudy.admin.remote.dto.resp.ShortLinkGroupStatsRespDTO;
 import com.wly.shortlinkStudy.admin.remote.dto.resp.ShortLinkStatsAccessRecordRespDTO;
 import com.wly.shortlinkStudy.admin.remote.dto.resp.ShortLinkStatsRespDTO;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +28,14 @@ public class ShortLinkStatsController {
     @GetMapping("/api/short-link/admin/v1/stats")
     public Result<ShortLinkStatsRespDTO> oneShortLinkStats(ShortLinkStatsReqDTO requestParam) {
         return shortLinkRemoteService.oneShortLinkStats(requestParam);
+    }
+
+    /**
+     * 访问分组短链接指定时间内监控数据
+     */
+    @GetMapping("/api/short-link/admin/v1/stats/group")
+    public Result<ShortLinkGroupStatsRespDTO> groupShortLinkStats(ShortLinkGroupStatsReqDTO requestParam) {
+        return shortLinkRemoteService.groupShortLinkStats(requestParam);
     }
 
 
