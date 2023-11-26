@@ -4,9 +4,11 @@ package com.wly.shortlinkStudy.admin.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.wly.shortlinkStudy.admin.common.convention.result.Result;
 import com.wly.shortlinkStudy.admin.remote.dto.ShortLinkRemoteService;
+import com.wly.shortlinkStudy.admin.remote.dto.req.ShortLinkGroupStatsAccessRecordReqDTO;
 import com.wly.shortlinkStudy.admin.remote.dto.req.ShortLinkGroupStatsReqDTO;
 import com.wly.shortlinkStudy.admin.remote.dto.req.ShortLinkStatsAccessRecordReqDTO;
 import com.wly.shortlinkStudy.admin.remote.dto.req.ShortLinkStatsReqDTO;
+import com.wly.shortlinkStudy.admin.remote.dto.resp.ShortLinkGroupStatsAccessRecordRespDTO;
 import com.wly.shortlinkStudy.admin.remote.dto.resp.ShortLinkGroupStatsRespDTO;
 import com.wly.shortlinkStudy.admin.remote.dto.resp.ShortLinkStatsAccessRecordRespDTO;
 import com.wly.shortlinkStudy.admin.remote.dto.resp.ShortLinkStatsRespDTO;
@@ -45,8 +47,13 @@ public class ShortLinkStatsController {
      * @param requestParam
      * @return
      */
-    @GetMapping("api/short-link/admin/v1/stats/access-record")
+    @GetMapping("/api/short-link/admin/v1/stats/access-record")
     public Result<IPage<ShortLinkStatsAccessRecordRespDTO>> shortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDTO requestParam) {
         return shortLinkRemoteService.shortLinkStatsAccessRecord(requestParam);
+    }
+
+    @GetMapping("/api/short-link/admin/v1/stats/access-record/group")
+    public Result<IPage<ShortLinkGroupStatsAccessRecordRespDTO>> groupShortLinkStatsAccessRecord(ShortLinkGroupStatsAccessRecordReqDTO requestParam) {
+        return shortLinkRemoteService.groupShortLinkStatsAccessRecord(requestParam);
     }
 }
