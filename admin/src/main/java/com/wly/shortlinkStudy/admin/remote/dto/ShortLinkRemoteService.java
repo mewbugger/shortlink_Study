@@ -10,6 +10,7 @@ import com.wly.shortlinkStudy.admin.common.convention.result.Results;
 import com.wly.shortlinkStudy.admin.remote.dto.req.*;
 import com.wly.shortlinkStudy.admin.remote.dto.resp.*;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.HashMap;
 import java.util.List;
@@ -145,6 +146,12 @@ public interface ShortLinkRemoteService {
         String resultBodyStr = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/stats/access-record/group", stringObjectMap);
         System.out.println(resultBodyStr);
         return JSON.parseObject(resultBodyStr, new TypeReference<>() {
+        });
+    }
+
+    default Result<String> getTitleByUrl(@RequestParam("url") String url) {
+        String resultStr = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/title?url=" + url);
+        return JSON.parseObject(resultStr, new TypeReference<>() {
         });
     }
 }
