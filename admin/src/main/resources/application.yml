@@ -19,4 +19,7 @@ spring:
       host: 192.168.81.130
       port: 6379
       password: javacppgorust
+short-link:
+  group:
+    max-num: 20
 
