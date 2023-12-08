@@ -214,7 +214,8 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                     .eq(ShortLinkDO::getEnableStatus, 0);
             ShortLinkDO shortLinkDO = baseMapper.selectOne(queryWrapper);
             //短链接不存在或者当前短链接的有效期已经过期了
-            if (shortLinkDO == null || shortLinkDO.getValidDate().before(new Date())) {
+            //还需要判断validDate不为空，因为如果是永久有效的话，删除后再复原的话是没有有效期的,即是空，这时就会跳转到404
+            if (shortLinkDO == null || shortLinkDO.getValidDate() != null && shortLinkDO.getValidDate().before(new Date())) {
                 stringRedisTemplate.opsForValue().set(String.format(RedisKeyConstant.GOTO_IS_NULL_SHORT_LINK_KEY, fullShortUrl), "-", 30, TimeUnit.MINUTES);
                 ((HttpServletResponse) response).sendRedirect("/page/notfound");
                 return;
