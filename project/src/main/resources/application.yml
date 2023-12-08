@@ -30,6 +30,15 @@ short-link:
   stats:
     locale:
       amap-key: 824c511f0997586ea016f979fdb23087
+  goto-domain:
+    white-list:
+      enable: true
+      names: '百度,必应,哔哩哔哩,牛客'
+      details:
+        - baidu.com
+        - bing.com
+        - bilibili.com
+        - nowcoder.com
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

@@ -21,6 +21,7 @@ import com.wly.shortlinkStudy.project.common.constant.ShortLinkConstant;
 import com.wly.shortlinkStudy.project.common.convention.exception.ClientException;
 import com.wly.shortlinkStudy.project.common.convention.exception.ServiceException;
 import com.wly.shortlinkStudy.project.common.enums.VaildDateTypeEnum;
+import com.wly.shortlinkStudy.project.config.GotoDomainWhiteListConfiguration;
 import com.wly.shortlinkStudy.project.dao.entity.*;
 import com.wly.shortlinkStudy.project.dao.mapper.*;
 import com.wly.shortlinkStudy.project.dto.req.ShortLinkBatchCreateReqDTO;
@@ -78,6 +79,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     private final LinkDeviceStatsMapper linkDeviceStatsMapper;
     private final LinkNetworkStatsMapper linkNetworkStatsMapper;
     private final LinkStatsTodayMapper linkStatsTodayMapper;
+    private final GotoDomainWhiteListConfiguration gotoDomainWhiteListConfiguration;
 
     //测试高德地图api的key
     @Value("${short-link.stats.locale.amap-key}")
@@ -88,6 +90,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
 
     @Override
     public ShortLinkCreateRespDTO createShortLink(ShortLinkCreateReqDTO requestParam) {
+        verificationWhiteList(requestParam.getOriginUrl());
         String shortLinkSuffix = generateSuffix(requestParam);
         String fullShortUrl = StrBuilder.create(createShortLinkDefaultDomain)
                 .append("/")
@@ -131,6 +134,21 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 .originUrl(shortLinkDO.getOriginUrl())
                 .gid(shortLinkDO.getGid())
                 .build();
+    }
+
+    private void verificationWhiteList(String originUrl) {
+        Boolean enable = gotoDomainWhiteListConfiguration.getEnable();
+        if (enable == null || !enable) {
+            return;
+        }
+        String domain = LinkUtil.extractDomain(originUrl);
+        if (StrUtil.isBlank(domain)) {
+            throw new ClientException("跳转短链接填写错误");
+        }
+        List<String> details = gotoDomainWhiteListConfiguration.getDetails();
+        if (!details.contains(domain)) {
+            throw new ClientException("延时环境为避免恶意攻击，请生成以下网站跳转链接：" + gotoDomainWhiteListConfiguration.getDetails());
+        }
     }
 
     @Override
@@ -413,6 +431,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void updateShortLink(ShortLinkUpdateReqDTO requestParam) {
+        verificationWhiteList(requestParam.getOriginUrl());
         //如果修改的是短链接的分组标识，则updateWrapper为空，无法修改，所以先找到原短链接，直接删除，将新的短链接插入数据库
         LambdaQueryWrapper<ShortLinkDO> queryWrapper = Wrappers.lambdaQuery(ShortLinkDO.class)
                 .eq(ShortLinkDO::getGid, requestParam.getGid())
