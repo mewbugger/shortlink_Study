@@ -117,6 +117,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
                     .orElseThrow(() -> new ClientException("用户登录错误"));
             return new UserLoginRespDTO(token);
         }
+        /**
+         * Hash
+         * Key: login_用户名
+         * Value:
+         *  Key: token标识
+         *  Val: JSON字符串(用户信息)
+         */
         String uuid = UUID.randomUUID().toString();
         // 用哈希，避免重复登录，导致不断创建新的token
         stringRedisTemplate.opsForHash().put("login_" + requestParam.getUsername(), uuid, JSON.toJSONString(userDO));
