@@ -22,4 +22,8 @@ spring:
 short-link:
   group:
     max-num: 20
+  flow-limit:
+    enable: true
+    time-window: 1 #单位是秒
+    max-access-count: 3 #一秒内同一个用户最多能操作3次
 
