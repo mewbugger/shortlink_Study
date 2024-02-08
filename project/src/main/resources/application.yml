@@ -27,6 +27,12 @@ spring:
     view:
       prefix: /templates/
       suffix: .html
+  cloud:
+    nacos:
+      discovery:
+        server-addr: http://localhost:8848
+        config:
+          server-addr: ${spring.cloud.nacos.discovery.server-addr}
 short-link:
   domain:
     default: nurl.ink:8001
