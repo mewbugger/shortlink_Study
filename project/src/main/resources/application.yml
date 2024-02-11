@@ -20,9 +20,6 @@ spring:
       host: 192.168.81.130
       port: 6379
       password: javacppgorust
-      channel-topic:
-        short-link-stats: 'short_link:stats-stream'
-        short-link-stats-group: 'short_link:stats-stream:only-group'
   mvc:
     view:
       prefix: /templates/

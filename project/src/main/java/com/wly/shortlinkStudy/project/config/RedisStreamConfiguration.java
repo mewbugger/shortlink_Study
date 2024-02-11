@@ -3,7 +3,6 @@ package com.wly.shortlinkStudy.project.config;
 import com.wly.shortlinkStudy.project.common.constant.RedisKeyConstant;
 import com.wly.shortlinkStudy.project.mq.consumer.ShortLinkStatsSaveConsumer;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -30,10 +29,6 @@ public class RedisStreamConfiguration {
     private final RedisConnectionFactory redisConnectionFactory;
     private final ShortLinkStatsSaveConsumer shortLinkStatsSaveConsumer;
 
-    @Value("${spring.data.redis.channel-topic.short-link-stats}")
-    private String topic;
-    @Value("${spring.data.redis.channel-topic.short-link-stats-group}")
-    private String group;
 
     @Bean
     public ExecutorService asyncStreamConsumer() {
