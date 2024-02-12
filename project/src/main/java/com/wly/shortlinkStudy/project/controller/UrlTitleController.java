@@ -17,6 +17,7 @@ public class UrlTitleController {
 
     private final UrlTitleServiceImpl urlTitleServiceImpl;
 
+
     /**
      * 根据url获取对于网站的标题
      * @param url

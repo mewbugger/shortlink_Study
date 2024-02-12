@@ -2,7 +2,7 @@ package com.wly.shortlinkStudy.admin.config;
 
 import com.wly.shortlinkStudy.admin.common.biz.user.UserFlowRiskControllerFilter;
 import com.wly.shortlinkStudy.admin.common.biz.user.UserTransmitFilter;
-import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;

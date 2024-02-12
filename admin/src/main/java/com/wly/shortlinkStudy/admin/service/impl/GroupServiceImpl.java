@@ -15,7 +15,7 @@ import com.wly.shortlinkStudy.admin.dao.mapper.GroupMapper;
 import com.wly.shortlinkStudy.admin.dto.req.ShortLinkGroupSortReqDTO;
 import com.wly.shortlinkStudy.admin.dto.req.ShortLinkGroupUpdateReqDTO;
 import com.wly.shortlinkStudy.admin.dto.resp.ShortLinkGroupRespDTO;
-import com.wly.shortlinkStudy.admin.remote.dto.ShortLinkRemoteService;
+import com.wly.shortlinkStudy.admin.remote.ShortLinkActualRemoteService;
 import com.wly.shortlinkStudy.admin.remote.dto.resp.ShortLinkGroupCountQueryRespDTO;
 import com.wly.shortlinkStudy.admin.service.GroupService;
 import com.wly.shortlinkStudy.admin.toolkit.RandomGenerator;
@@ -43,11 +43,7 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
     @Value("${short-link.group.max-num}")
     private Integer groupMaxNum;
 
-    /**
-     * 后续重构为 SpringCloud Feign 调用
-     */
-    ShortLinkRemoteService shortLinkRemoteService = new ShortLinkRemoteService() {
-    };
+    private final ShortLinkActualRemoteService shortLinkActualRemoteService;
 
     @Override
     public void saveGroup(String groupName) {
@@ -97,7 +93,7 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
         //查到当前用户的所有短链接分组列表
         List<GroupDO> groupDOList = baseMapper.selectList(queryWrapper);
         //通过当前用户的gid列表获取ShortLinkGroupCountQueryRespDTO（包含gid和shortLinkCount）的列表
-        Result<List<ShortLinkGroupCountQueryRespDTO>> listResult = shortLinkRemoteService
+        Result<List<ShortLinkGroupCountQueryRespDTO>> listResult = shortLinkActualRemoteService
                 //将 groupDOList 中每个 GroupDO 对象的 gid 属性提取出来，并形成一个新的列表
                 //map(GroupDO::getGid) 是一个映射操作，它会将流中的每个 GroupDO 对象映射为其 gid 属性。
                 //groupDOList.stream().map(GroupDO::getGid).toList()==获取当前用户的所有短链接分组的分组标识，并将它们存到一个列表里面
