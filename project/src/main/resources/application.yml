@@ -1,6 +1,8 @@
 server:
   port: 8001
 spring:
+  application:
+    name: short-link-project
   datasource:
     username: root
     password: javacppgorust
@@ -28,6 +30,7 @@ spring:
     nacos:
       discovery:
         server-addr: http://localhost:8848
+
 short-link:
   domain:
     default: nurl.ink:8001

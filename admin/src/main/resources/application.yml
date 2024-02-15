@@ -1,6 +1,8 @@
 server:
   port: 8002
 spring:
+  application:
+    name: short-link-admin
   datasource:
     username: root
     password: javacppgorust
@@ -19,6 +21,11 @@ spring:
       host: 192.168.81.130
       port: 6379
       password: javacppgorust
+  cloud:
+    nacos:
+      discovery:
+        server-addr: http://localhost:8848
+
 short-link:
   group:
     max-num: 20

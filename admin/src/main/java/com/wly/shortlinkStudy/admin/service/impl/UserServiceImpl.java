@@ -62,7 +62,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
 
     @Override
     public Boolean hasUsername(String username) {
-        return userRegisterCachePenetrationBloomFilter.contains(username);
+        return !userRegisterCachePenetrationBloomFilter.contains(username);
     }
 
     @Override
@@ -112,6 +112,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         }
         Map<Object, Object> hasLoginMap = stringRedisTemplate.opsForHash().entries(USER_LOGIN_KEY + requestParam.getUsername());
         if (CollUtil.isNotEmpty(hasLoginMap)) {
+            stringRedisTemplate.expire(USER_LOGIN_KEY + requestParam.getUsername(), 30L, TimeUnit.MINUTES);
             String token = hasLoginMap.keySet().stream()
                     .findFirst()
                     .map(Object::toString)
@@ -130,7 +131,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         stringRedisTemplate.opsForHash().put(USER_LOGIN_KEY + requestParam.getUsername(), uuid, JSON.toJSONString(userDO));
         // 设置过期时间
         // TODO 加入前端后，将过期时间改变为30分钟
-        stringRedisTemplate.expire("login_" + requestParam.getUsername(), 30, TimeUnit.DAYS);
+        stringRedisTemplate.expire(USER_LOGIN_KEY + requestParam.getUsername(), 30, TimeUnit.DAYS);
         return new UserLoginRespDTO(uuid);
     }
 
