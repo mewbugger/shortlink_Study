@@ -11,5 +11,5 @@ public class ShortLinkGroupSaveReqDTO {
     /**
      * 短链接分组名
      */
-    private String groupName;
+    private String name;
 }
