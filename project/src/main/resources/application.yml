@@ -40,12 +40,19 @@ short-link:
   goto-domain:
     white-list:
       enable: true
-      names: '百度,必应,哔哩哔哩,牛客'
+      names: '百度,必应,哔哩哔哩,牛客,CSDN,力扣,ACWing,语雀,知乎,小林coding,JavaGuide,'
       details:
         - baidu.com
         - bing.com
         - bilibili.com
         - nowcoder.com
+        - csdn.net
+        - leetcode.cn
+        - acwing.com
+        - yuque.com
+        - zhihu.com
+        - xiaolincoding.com
+        - javaguide.cn
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
