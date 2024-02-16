@@ -19,14 +19,14 @@ import com.wly.shortlinkStudy.project.common.enums.VaildDateTypeEnum;
 import com.wly.shortlinkStudy.project.config.GotoDomainWhiteListConfiguration;
 import com.wly.shortlinkStudy.project.dao.entity.ShortLinkDO;
 import com.wly.shortlinkStudy.project.dao.entity.ShortLinkGotoDO;
-import com.wly.shortlinkStudy.project.dao.mapper.*;
+import com.wly.shortlinkStudy.project.dao.mapper.ShortLinkGotoMapper;
+import com.wly.shortlinkStudy.project.dao.mapper.ShortLinkMapper;
 import com.wly.shortlinkStudy.project.dto.biz.ShortLinkStatsRecordDTO;
 import com.wly.shortlinkStudy.project.dto.req.ShortLinkBatchCreateReqDTO;
 import com.wly.shortlinkStudy.project.dto.req.ShortLinkCreateReqDTO;
 import com.wly.shortlinkStudy.project.dto.req.ShortLinkPageReqDTO;
 import com.wly.shortlinkStudy.project.dto.req.ShortLinkUpdateReqDTO;
 import com.wly.shortlinkStudy.project.dto.resp.*;
-import com.wly.shortlinkStudy.project.mq.producer.DelayShortLinkStatsProducer;
 import com.wly.shortlinkStudy.project.mq.producer.ShortLinkStatsSaveProducer;
 import com.wly.shortlinkStudy.project.service.ShortLinkService;
 import com.wly.shortlinkStudy.project.toolkit.HashUtil;
@@ -73,17 +73,9 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
     private final ShortLinkGotoMapper shortLinkGotoMapper;
     private final StringRedisTemplate stringRedisTemplate;
     private final RedissonClient redissonClient;
-    private final LinkAccessStatsMapper linkAccessStatsMapper;
-    private final LinkLocaleStatsMapper linkLocaleStateMapper;
-    private final LinkOsStatsMapper linkOsStatsMapper;
-    private final LinkBrowserStatsMapper linkBrowserStatsMapper;
-    private final LinkAccessLogsMapper linkAccessLogsMapper;
-    private final LinkDeviceStatsMapper linkDeviceStatsMapper;
-    private final LinkNetworkStatsMapper linkNetworkStatsMapper;
-    private final LinkStatsTodayMapper linkStatsTodayMapper;
     private final GotoDomainWhiteListConfiguration gotoDomainWhiteListConfiguration;
-    private final DelayShortLinkStatsProducer delayShortLinkStatsProducer;
     private final ShortLinkStatsSaveProducer shortLinkStatsSaveProducer;
+    private final ShortLinkMapper shortLinkMapper;
 
     //测试高德地图api的key
     @Value("${short-link.stats.locale.amap-key}")
@@ -157,7 +149,7 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
 
     @Override
     public IPage<ShortLinkPageRespDTO> pageShortLink(ShortLinkPageReqDTO requestParam) {
-        IPage<ShortLinkDO> resultPage = baseMapper.pageLink(requestParam);
+        IPage<ShortLinkDO> resultPage = shortLinkMapper.pageLink(requestParam);
         return resultPage.convert(each -> {
             ShortLinkPageRespDTO result = BeanUtil.toBean(each, ShortLinkPageRespDTO.class);
             result.setDomain("http://" + result.getDomain());
@@ -171,6 +163,8 @@ public class ShortLinkServiceImpl extends ServiceImpl<ShortLinkMapper, ShortLink
                 .select("gid as gid, count(*) as shortLinkCount")
                 .in("gid", requestParam)
                 .eq("enable_status", 0)
+                .eq("del_flag", 0)
+                .eq("del_time", 0L)
                 .groupBy("gid");
         List<Map<String, Object>> shortLinkDOList = baseMapper.selectMaps(queryWrapper);
         return BeanUtil.copyToList(shortLinkDOList, ShortLinkGroupCountQueryRespDTO.class);
